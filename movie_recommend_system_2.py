@@ -1,3 +1,17 @@
+# This code is based on Tfidf vectorizer and Cosine Similarity 
+# Cosine similarity measures the cosine of the angle between two vectors in a multi-dimensional space.
+# It is often used to measure how similar two documents or texts are based on their word vectors.
+# The value of cosine similarity ranges from -1 to 1:
+# - A value of 1 means the two vectors are identical.
+# - A value of 0 means they are orthogonal (no similarity).
+# - A value of -1 means they are completely opposite.
+
+# Cosine similarity formula:
+# cos(θ) = (A · B) / (||A|| * ||B||)
+# Where:
+# - A · B is the dot product of vectors A and B.
+# - ||A|| and ||B|| are the magnitudes (lengths) of the vectors A and B.
+
 # Import Libraries
 import pandas as pd
 import numpy as np
