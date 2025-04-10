@@ -1,96 +1,139 @@
 # Movie Recommendation System
 
-This is a movie recommendation system built using **TF-IDF Vectorizer** and **Cosine Similarity**. The system provides movie recommendations based on the textual similarity of various features such as the movie's overview, genres, keywords, cast, and crew. It also fetches movie posters from **The Movie Database (TMDb) API** and displays them using a **Streamlit** web interface.
+A sophisticated content-based movie recommendation engine that suggests films similar to your favorites based on content features like plot, genres, cast, and crew.
 
-## Features
+![Movie Recommendation System Interface](Pictures/image.png)
 
-- Recommends movies based on their content similarity using TF-IDF Vectorization.
-- Fetches movie posters dynamically using the TMDb API.
-- Displays movie recommendations in a visually appealing format using Streamlit.
-- Easy to use dropdown menu to select a movie and receive recommendations.
+## 🎬 Overview
 
-## Prerequisites
+This project implements an intelligent movie recommendation system using **TF-IDF Vectorization** and **Cosine Similarity** algorithms. The system analyzes movie content features including overviews, genres, keywords, cast, and crew to identify similar films. Results are presented through an intuitive **Streamlit** interface that displays recommendations along with movie posters fetched from **The Movie Database (TMDb) API**.
+
+## ✨ Key Features
+
+- **Content-Based Filtering**: Recommends movies by analyzing textual similarity using TF-IDF Vectorization
+- **Intelligent Similarity Calculation**: Uses Cosine Similarity to find movies with related themes, genres, and production elements
+- **Dynamic Poster Integration**: Fetches and displays movie posters via TMDb API
+- **User-Friendly Interface**: Clean Streamlit UI with simple dropdown selection
+- **Diverse Recommendations**: Algorithm balances similarity with variety to avoid recommendation bubbles
+
+## 🛠️ Technology Stack
+
+- **Python 3.x**: Core programming language
+- **Pandas & NumPy**: Data manipulation and numerical operations
+- **Scikit-learn**: TF-IDF Vectorization and Cosine Similarity computation
+- **NLTK**: Natural language processing for text analysis
+- **Streamlit**: Interactive web application interface
+- **Requests**: API integration with TMDb
+- **Pickle**: Model serialization and persistence
+
+## 📋 Prerequisites
 
 Before running the project, ensure you have the following installed:
 
 - Python 3.x
-- Streamlit
-- Pandas
-- Scikit-learn
-- NLTK
-- Requests
-- dotenv (optional, for secure API key management)
+- Required libraries (installable via pip)
+- TMDb API key
 
-You can install the required Python libraries using the following command:
+## 📦 Installation
 
-```bash
-pip install streamlit pandas scikit-learn nltk requests python-dotenv
-```
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/AnuragIndora/Movie-Recommendation-System.git
+   cd Movie-Recommendation-System
+   ```
 
-## Setup Instructions
+2. Install required dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
 
-1. Clone the repository or download the project files.
+3. Create a free account on [The Movie Database (TMDb)](https://www.themoviedb.org/) and obtain an API key
 
-2. Ensure you have the **movie_dict.pkl** and **similarity.pkl** files in the project directory. These files contain the preprocessed movie data and similarity matrix, respectively.
+4. (Optional) Create a `.env` file to securely store your API key:
+   ```
+   TMDB_API_KEY=your_actual_api_key_here
+   ```
 
-3. To fetch movie posters, you will need an API key from [The Movie Database (TMDb)](https://www.themoviedb.org/). Sign up for an account and obtain your API key.
+## 🚀 Usage
 
-4. (Optional) For better security, store your API key in an `.env` file:
+1. Ensure you have the preprocessed files (`movie_dict.pkl` and `similarity.pkl`) in your project directory
+   > Note: If you don't have the `similarity.pkl` file (which is quite large), you can generate it by running `movie_recommend_system_2.py`
 
-    - Create a `.env` file in the project directory:
-      ```
-      TMDB_API_KEY=your_actual_api_key_here
-      ```
-    - Install `python-dotenv` for loading environment variables:
-      ```bash
-      pip install python-dotenv
-      ```
-
-## How to Run the Project
-
-1. Make sure you have the required dependencies installed.
-   
-2. Run the Streamlit app using the following command in your terminal:
-   
+2. Launch the Streamlit application:
    ```bash
    streamlit run app.py
    ```
 
-3. The app should open automatically in your browser. If not, go to `http://localhost:8501` in your web browser.
+3. Access the web interface at `http://localhost:8501`
 
-4. Use the dropdown menu to select a movie, and click the **Recommend** button to view movie recommendations along with their posters.
+4. Select a movie from the dropdown menu and click **Recommend** to view similar movies with their posters
 
-## Project Structure
+## 🗂️ Project Structure
 
-- **app.py**: The main Streamlit app file that loads the movie data, computes recommendations, and fetches movie posters.
-- **movie_dict.pkl**: The preprocessed movie dataset stored as a dictionary.
-- **similarity.pkl**: The similarity matrix computed using TF-IDF Vectorization.
-- **.env**: (Optional) Environment file for storing the TMDb API key.
-- **README.md**: This file, containing instructions for running the project.
-
-## Functions
-
-- **fetch_poster(movie_id: int) -> str**: Fetches the poster URL for a movie using the TMDb API.
-- **recommended_movie(movie: str) -> list**: Returns a list of recommended movies and their poster URLs based on the selected movie.
-
-## TMDb API Integration
-
-This project uses The Movie Database (TMDb) API to fetch movie posters. Ensure you add your API key to the project either by hardcoding it in the `fetch_poster()` function or by storing it in an `.env` file.
-
-### Example
-
-```python
-api_key = os.getenv('TMDB_API_KEY')  # Load from environment variable
+```
+Movie-Recommendation-System/
+├── .gitignore 
+├── app.py                  # Main Streamlit application
+├── movie_recommend_system_2.py  # Script to generate similarity matrix
+├── movie_dict.pkl          # Preprocessed movie data dictionary
+├── similarity.pkl          # Precomputed similarity matrix (not uploaded)
+├── .env                    # Environment variables (API keys)
+├── requirements.txt        # Project dependencies
+├── MovieData1/             # Movies Dataset CSV files  
+├── Pictures/               # Images folder for UI elements
+└── README.md               # Project documentation
 ```
 
-Or hardcode it:
+## 🔍 How It Works
+
+1. **Data Preprocessing**:
+   - Movie metadata is cleaned and structured
+   - Text features (overview, keywords, etc.) are tokenized and processed
+   - TF-IDF vectorization converts text features into numerical vectors
+
+2. **Similarity Computation**:
+   - Cosine similarity calculates the similarity between movie vectors
+   - Results are stored in a similarity matrix for efficient lookups
+
+3. **Recommendation Generation**:
+   - When a user selects a movie, the system finds the most similar movies based on the precomputed similarity scores
+   - The top 5 most similar movies are identified and displayed
+   - Movie posters are fetched in real-time using the TMDb API
+
+## 🔧 Core Functions
 
 ```python
-api_key = 'your_actual_api_key_here'
+def fetch_poster(movie_id):
+    """Fetches movie poster from TMDb API using the movie ID"""
+    # Implementation details...
+
+def recommend_movies(movie_title):
+    """Generates movie recommendations based on similarity scores"""
+    # Implementation details...
 ```
 
-## Example Usage
+## 🌟 Future Improvements
 
-1. Run the app using Streamlit.
-2. Select a movie from the dropdown.
-3. Click the **Recommend** button to view the recommended movies and their posters.
+- Implement user profiles and personalized recommendations
+- Add hybrid filtering combining content-based and collaborative approaches
+- Incorporate more advanced NLP techniques for better text analysis
+- Create a more comprehensive evaluation framework for recommendation quality
+- Develop mobile responsiveness for cross-device compatibility
+
+## 📄 License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## 🙏 Acknowledgements
+
+- [The Movie Database (TMDb)](https://www.themoviedb.org/) for providing the API
+- [Streamlit](https://streamlit.io/) for the interactive web framework
+- [Scikit-learn](https://scikit-learn.org/) for the machine learning tools
+
+## 👤 Author
+
+- **Anurag Indora** - [GitHub](https://github.com/AnuragIndora)
+
+---
+
+If you find this project useful, please consider giving it a star ⭐️ on GitHub!
