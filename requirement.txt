@@ -1,7 +1,8 @@
 pandas
 numpy
-ast
+astor
 requests
 nltk
 scikit-learn
 streamlit
+python-dotenv

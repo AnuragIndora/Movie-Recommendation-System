@@ -3,6 +3,10 @@ import streamlit as st
 import pandas as pd
 import requests
 import os
+from dotenv import load_dotenv
+
+# load the api keys and urls 
+load_dotenv()
 
 # Load movie data and similarity matrix from pickle files
 with open('movie_dict.pkl', 'rb') as file:
@@ -28,11 +32,11 @@ def fetch_poster(movie_id: int) -> str:
         requests.RequestException: If the API request fails.
         KeyError: If the API response does not contain a poster path.
     """
-    api_key = '20c72665a524df7b2f19090233398e4a'  # Use environment variable for API key
+    api_key = os.getenv('TMDB_API')  # Use environment variable for API key
     if not api_key:
         raise ValueError("TMDB API key not set")
 
-    url = f"https://api.themoviedb.org/3/movie/{movie_id}?api_key=20c72665a524df7b2f19090233398e4a&language=en-US"
+    url = f"https://api.themoviedb.org/3/movie/{movie_id}?api_key={api_key}&language=en-US"
     try:
         response = requests.get(url)
         response.raise_for_status()
@@ -96,9 +100,9 @@ selected_movie = st.selectbox("Select a movie from the dropdown", movies['title'
 #             with cols[i]:
 #                 st.text(movie_title)
 #                 if poster_url:
-#                     st.image(poster_url, use_column_width=True)
+#                     st.image(poster_url, use_container_width =True)
 #                 else:
-#                     st.image('https://via.placeholder.com/150', use_column_width=True)
+#                     st.image('https://via.placeholder.com/150', use_container_width =True)
 #     else:
 #         st.write("No recommendations available.")
 
@@ -118,9 +122,9 @@ if st.button('Recommend'):
     with cols[0]:
         st.text(selected_movie)
         if selected_movie_poster:
-            st.image(selected_movie_poster, use_column_width=True)
+            st.image(selected_movie_poster, use_container_width =True)
         else:
-            st.image('https://via.placeholder.com/150', use_column_width=True)
+            st.image('https://via.placeholder.com/150', use_container_width =True)
     
     # Display recommended movies
     if recommendations:
@@ -128,8 +132,8 @@ if st.button('Recommend'):
             with cols[i+1]:
                 st.text(movie_title)
                 if poster_url:
-                    st.image(poster_url, use_column_width=True)
+                    st.image(poster_url, use_container_width =True)
                 else:
-                    st.image('https://via.placeholder.com/150', use_column_width=True)
+                    st.image('https://via.placeholder.com/150', use_container_width =True)
     else:
         st.write("No recommendations available.")
