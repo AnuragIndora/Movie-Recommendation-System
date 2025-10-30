@@ -1,17 +1,20 @@
 import pickle
+import gzip
 import streamlit as st
 import pandas as pd
 import requests
+from scipy import sparse
 
 # TMDB API key (direct use)
 TMDB_API_KEY = "082f9428255940bcfe0010f2e7f5d5a4"
 
-# Load movie data and similarity matrix
-with open('movie_dict.pkl', 'rb') as file:
+# -------------------------------
+# Load compressed movie data and sparse similarity matrix
+# -------------------------------
+with gzip.open('movie_dict.pkl.gz', 'rb') as file:
     movie_dict = pickle.load(file)
 
-with open('similarity.pkl', 'rb') as file:
-    similarity = pickle.load(file)
+similarity = sparse.load_npz('similarity_sparse.npz')
 
 movies = pd.DataFrame(movie_dict)
 
@@ -40,7 +43,9 @@ def recommend_movie(movie_title: str):
         st.error("Movie not found in the database.")
         return []
 
-    distances = similarity[movie_index]
+    # Convert sparse row to dense array for this single movie
+    distances = similarity[movie_index].toarray().ravel()
+
     movie_list = sorted(list(enumerate(distances)),
                         reverse=True,
                         key=lambda x: x[1])[1:6]
@@ -53,7 +58,9 @@ def recommend_movie(movie_title: str):
     return recommendations
 
 
+# -------------------------------
 # Streamlit UI
+# -------------------------------
 st.title("🎬 Movie Recommendation System")
 
 selected_movie = st.selectbox("Select a movie from the dropdown",
