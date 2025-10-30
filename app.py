@@ -2,138 +2,88 @@ import pickle
 import streamlit as st
 import pandas as pd
 import requests
-import os
-from dotenv import load_dotenv
 
-# load the api keys and urls 
-load_dotenv()
+# TMDB API key (direct use)
+TMDB_API_KEY = "082f9428255940bcfe0010f2e7f5d5a4"
 
-# Load movie data and similarity matrix from pickle files
+# Load movie data and similarity matrix
 with open('movie_dict.pkl', 'rb') as file:
     movie_dict = pickle.load(file)
 
 with open('similarity.pkl', 'rb') as file:
     similarity = pickle.load(file)
 
-# Convert the loaded dictionary to a DataFrame
 movies = pd.DataFrame(movie_dict)
 
-def fetch_poster(movie_id: int) -> str:
-    """
-    Fetch the poster URL for a movie from The Movie Database API.
 
-    Args:
-        movie_id (int): The ID of the movie to fetch the poster for.
-
-    Returns:
-        str: The URL of the movie poster.
-
-    Raises:
-        requests.RequestException: If the API request fails.
-        KeyError: If the API response does not contain a poster path.
-    """
-    api_key = os.getenv('TMDB_API')  # Use environment variable for API key
-    if not api_key:
-        raise ValueError("TMDB API key not set")
-
-    url = f"https://api.themoviedb.org/3/movie/{movie_id}?api_key={api_key}&language=en-US"
+def fetch_poster(movie_id: int) -> str | None:
+    """Fetch the poster URL for a movie from The Movie Database API."""
+    url = f"https://api.themoviedb.org/3/movie/{movie_id}?api_key={TMDB_API_KEY}&language=en-US"
     try:
         response = requests.get(url)
         response.raise_for_status()
-    except requests.RequestException as e:
-        st.error(f"Failed to fetch poster: {e}")
-        return None
-
-    try:
         data = response.json()
-        poster_path = data['poster_path']
-    except KeyError:
-        st.error("Poster path not found in API response")
+        poster_path = data.get('poster_path')
+        if poster_path:
+            return f"https://image.tmdb.org/t/p/w500/{poster_path}"
+        return None
+    except Exception as e:
+        st.error(f"Failed to fetch poster for movie ID {movie_id}: {e}")
         return None
 
-    full_path = f"https://image.tmdb.org/t/p/w500/{poster_path}"
-    return full_path
 
-def recommended_movie(movie):
-    """
-    Recommend movies similar to the selected movie.
-
-    Args:
-        movie (str): The title of the movie to find recommendations for.
-
-    Returns:
-        list: A list of recommended movie titles.
-    """
+def recommend_movie(movie_title: str):
+    """Recommend movies similar to the selected movie."""
     try:
-        movie_index = movies[movies['title'] == movie].index[0]
+        movie_index = movies[movies['title'] == movie_title].index[0]
     except IndexError:
         st.error("Movie not found in the database.")
         return []
 
     distances = similarity[movie_index]
-    movie_list = sorted(list(enumerate(distances)), reverse=True, key=lambda x: x[1])[1:6]
+    movie_list = sorted(list(enumerate(distances)),
+                        reverse=True,
+                        key=lambda x: x[1])[1:6]
 
-    recommended_movies = []
-    for i in movie_list:
-        movie_title = movies.iloc[i[0]].title
-        movie_id = movies.iloc[i[0]].movie_id
-        poster_url = fetch_poster(movie_id)
-        recommended_movies.append((movie_title, poster_url))
-    
-    return recommended_movies
+    recommendations = []
+    for i, _ in movie_list:
+        movie_data = movies.iloc[i]
+        poster_url = fetch_poster(movie_data.movie_id)
+        recommendations.append((movie_data.title, poster_url))
+    return recommendations
 
-# Streamlit app
-st.title('Movie Recommendation System')
 
-# Create a dropdown menu with movie titles
-selected_movie = st.selectbox("Select a movie from the dropdown", movies['title'].values)
+# Streamlit UI
+st.title("🎬 Movie Recommendation System")
 
-# # Display recommendations when the button is clicked
-# if st.button('Recommend'):
-#     recommendations = recommended_movie(selected_movie)
-    
-#     if recommendations:
-#         col1, col2, col3, col4, col5 = st.columns(5)
-#         cols = [col1, col2, col3, col4, col5]
-        
-#         for i, (movie_title, poster_url) in enumerate(recommendations):
-#             with cols[i]:
-#                 st.text(movie_title)
-#                 if poster_url:
-#                     st.image(poster_url, use_container_width =True)
-#                 else:
-#                     st.image('https://via.placeholder.com/150', use_container_width =True)
-#     else:
-#         st.write("No recommendations available.")
+selected_movie = st.selectbox("Select a movie from the dropdown",
+                              movies['title'].values)
 
-# Display recommendations when the button is clicked
-if st.button('Recommend'):
-    recommendations = recommended_movie(selected_movie)
-    
-    # Show the selected movie
-    selected_movie_data = movies[movies['title'] == selected_movie]
-    selected_movie_id = selected_movie_data.iloc[0]['movie_id']
-    selected_movie_poster = fetch_poster(selected_movie_id)
-    
-    col1, col2, col3, col4, col5, col6 = st.columns(6)
-    cols = [col1, col2, col3, col4, col5, col6]
-    
-    # Display the selected movie
-    with cols[0]:
-        st.text(selected_movie)
-        if selected_movie_poster:
-            st.image(selected_movie_poster, use_container_width =True)
-        else:
-            st.image('https://via.placeholder.com/150', use_container_width =True)
-    
-    # Display recommended movies
-    if recommendations:
-        for i, (movie_title, poster_url) in enumerate(recommendations):
-            with cols[i+1]:
-                st.text(movie_title)
-                if poster_url:
-                    st.image(poster_url, use_container_width =True)
-                else:
-                    st.image('https://via.placeholder.com/150', use_container_width =True)
+if st.button("Recommend"):
+    recommendations = recommend_movie(selected_movie)
+
+    selected_movie_data = movies[movies['title'] == selected_movie].iloc[0]
+    selected_poster = fetch_poster(selected_movie_data.movie_id)
+
+    # --- Row 1: "You selected" text ---
+    st.subheader("You selected:")
+
+    # --- Row 2: Poster of the selected movie ---
+    if selected_poster:
+        st.image(selected_poster, width=250)
     else:
-        st.write("No recommendations available.")
+        st.image("https://via.placeholder.com/250")
+
+    # --- Row 3: "Recommended movies" text ---
+    st.subheader("Recommended Movies:")
+
+    # --- Row 4: Posters of 5 recommended movies ---
+    if recommendations:
+        cols = st.columns(5)
+        for i, (title, poster) in enumerate(recommendations):
+            with cols[i]:
+                st.image(poster or "https://via.placeholder.com/150",
+                         use_container_width=True)
+                st.text(title)
+    else:
+        st.warning("No recommendations found.")
